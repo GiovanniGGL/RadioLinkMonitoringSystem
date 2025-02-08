@@ -47,5 +47,3 @@ A comprehensive web-based monitoring system for radio link networks, specificall
 - Color-coded status indicators
 - Performance thresholds monitoring
 - Equipment-specific parameter display
-
-*Note: This documentation assumes basic familiarity with network monitoring systems and radio link equipment. For detailed technical specifications of the equipment, please refer to the respective manufacturer documentation.*
