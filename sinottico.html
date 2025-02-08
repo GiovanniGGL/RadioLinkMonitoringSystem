@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <!-- Credits: Giovani Gaetani Liseo -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Monitoraggio Rete Ponti Radio</title>
+
+    <link href="/static/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/assets/css/all.min.css" rel="stylesheet">
+    <script src="/static/assets/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+ 
+            :root {
+                --colore-primario: #2C3E50;
+                --colore-secondario: #f0880a;
+                --colore-success: #2ECC71;
+                --colore-warning: #F39C12;
+                --colore-danger: #E74C3C;
+                --colore-sfondo: #ECF0F1;
+                --colore-testo: #2C3E50;
+                --shadow-principale: 0 4px 6px rgba(0,0,0,0.1);
+                --border-radius: 12px;
+            }
+
+            body {
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+                background-color: var(--colore-sfondo);
+                color: var(--colore-testo);
+                line-height: 1.6;
+                margin: 0;
+                padding: 20px;
+                transition: background-color 0.3s ease;
+            }
+
+            .main-header {
+                background-color: #000094;
+                color: white;
+                padding: 15px 20px;
+                margin-bottom: 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            }
+
+            .header-container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .logo-section {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .logo-section i {
+                font-size: 2rem;
+                color: var(--colore-secondario);
+            }
+
+            .logo-section h1 {
+                margin: 0;
+                font-size: 1.5rem;
+                font-weight: 300;
+            }
+
+            .header-controls {
+                display: flex;
+                align-items: center;
+                gap: 20px;
+            }
+
+            .network-stats {
+                display: flex;
+                gap: 15px;
+            }
+
+            .stat-item {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .stat-item i {
+                color: var(--colore-secondario);
+            }
+
+            .btn-refresh-all {
+                background-color: var(--colore-secondario);
+                color: white;
+                border: none;
+                padding: 8px 15px;
+                border-radius: 6px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                transition: all 0.3s ease;
+            }
+
+            .btn-refresh-all:hover {
+                background-color: #4CA6E8;
+                transform: scale(1.05);
+            }
+
+            .network-container {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                gap: 20px;
+                padding: 20px;
+                background-color: var(--colore-sfondo);
+            }
+
+            .ponte-block {
+                background-color: white;
+                border-radius: var(--border-radius);
+                box-shadow: 
+                    0 10px 20px rgba(0,0,0,0.05), 
+                    0 6px 6px rgba(0,0,0,0.05);
+                padding: 20px;
+                transition: all 0.3s ease;
+                border: 2px solid transparent;
+                position: relative;
+                overflow: hidden;
+                animation: fadeIn 0.5s ease;
+            }
+
+            .ponte-block:hover {
+                transform: translateY(-5px);
+                box-shadow: 
+                    0 15px 25px rgba(0,0,0,0.08), 
+                    0 8px 10px rgba(0,0,0,0.08);
+                border-color: var(--colore-secondario);
+            }
+
+            .ponte-block.alert {
+                border-color: var(--colore-danger);
+                background-color: #FFEBEE;
+            }
+
+            .ponte-block.warning {
+                border-color: var(--colore-warning);
+                background-color: #FFF3E0;
+            }
+
+            .ponte-title {
+                font-family: Arial, sans-serif;
+                display: block;
+                padding: 14px;
+              }
+              
+              .ponte-sorgente {
+                color: #000;  /* blue color */
+                font-size: 1.2em;
+                text-transform: uppercase;
+              }
+              
+              .ponte-destinazione {
+                color: #000;  /* red color */
+                font-style: italic;
+                font-weight: bold;
+              }
+
+            .btn-snmp {
+                background-color: var(--colore-secondario);
+                color: white;
+                border: none;
+                padding: 10px 15px;
+                border-radius: 6px;
+                text-transform: uppercase;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto;
+                gap: 8px;
+            }
+
+            .btn-snmp:hover {
+                background-color: #2db50b;
+                transform: scale(1.05);
+                box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            }
+
+            .snmp-data {
+                background-color: #F9F9F9;
+                border-radius: 8px;
+                padding: 12px;
+                margin-top: 15px;
+                max-height: 500px;
+                overflow-y: auto;
+                font-size: 0.9em;
+                border: 1px solid #E0E0E0;
+            }
+
+            .snmp-data::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            .snmp-data::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 10px;
+            }
+
+            .snmp-data::-webkit-scrollbar-thumb {
+                background: var(--colore-secondario);
+                border-radius: 10px;
+            }
+
+            .ponte-header a:link {
+                color:black;
+                font-weight: bold;
+                text-decoration: underline;
+            }
+
+            .ponte-header {
+                text-align: center;
+                margin-bottom: 15px;
+            }
+
+            .ponte-header strong {
+                color: var(--colore-primario);
+                font-weight: 600;
+            }
+
+            @media screen and (max-width: 768px) {
+                .network-container {
+                    grid-template-columns: 1fr;
+                }
+                
+                .ponte-block {
+                    width: 100%;
+                }
+
+                .header-container {
+                    flex-direction: column;
+                    text-align: center;
+                }
+
+                .header-controls {
+                    flex-direction: column;
+                    width: 100%;
+                    margin-top: 15px;
+                }
+
+                .network-stats {
+                    justify-content: center;
+                    margin-bottom: 15px;
+                }
+            }
+
+            .ponte-badge {
+                color: white;
+                padding: 4px 8px;
+                border-radius: 50px;
+              }
+              
+              .ponte-rt1 {
+                background-color: #007bff;
+              }
+              
+              .ponte-rt2 {
+                background-color: #28a745;
+              }
+              
+              .ponte-rt3 {
+                background-color: #ffc107;
+                color: black;
+              }
+              
+              .ponte-rt2-rt3 {
+                background: linear-gradient(to right, #28a745 50%, #ffc107 50%);
+              }
+              
+              .ponte-rt1-rt2 {
+                background: linear-gradient(to right, #007bff 50%, #28a745 50%);
+              }
+              
+              .ponte-marca {
+                font-weight: bold;
+                color: #333;
+                margin-top: 8px;
+                font-size: 18px;
+              }
+
+            /* Animazioni */
+            @keyframes fadeIn {
+                from { 
+                    opacity: 0; 
+                    transform: translateY(20px); 
+                }
+                to { 
+                    opacity: 1; 
+                    transform: translateY(0); 
+                }
+            }
+
+            .filter-buttons {
+                display: flex;
+                gap: 10px;
+                margin: 10px 0;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .filter-btn {
+                padding: 8px 16px;
+                border: none;
+                border-radius: 50px;
+                cursor: pointer;
+                font-weight: 500;
+                transition: all 0.3s ease;
+            }
+            
+            .filter-btn.active {
+                transform: scale(1.05);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            }
+            
+            .filter-btn.all {
+                background-color: #6c757d;
+                color: white;
+            }
+            
+            .filter-btn.rt1 {
+                background-color: #007bff;
+                color: white;
+            }
+            
+            .filter-btn.rt2 {
+                background-color: #28a745;
+                color: white;
+            }
+            
+            .filter-btn.rt3 {
+                background-color: #ffc107;
+                color: black;
+            }
+            
+            .filter-btn.rt2-rt3 {
+                background: linear-gradient(to right, #28a745 50%, #ffc107 50%);
+                color: white;
+            }
+            
+            .filter-btn.rt1-rt2 {
+                background: linear-gradient(to right, #007bff 50%, #28a745 50%);
+                color: white;
+            }
+            
+            .filter-btn:hover {
+                opacity: 0.9;
+                transform: scale(1.05);
+            }
+            
+        </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo-section">
+                <img src="{{url_for('static', filename='assets/img/rai-way_logo.png')}}" width="100" height="45" style="vertical-align: middle;" alt="Rai Way Logo" />                
+                <h1>Sistema Monitoraggio Rete Ponti Radio</h1>
+            </div>
+            <div class="header-controls">
+                <div class="network-stats">
+                    <span class="stat-item total-bridges">
+                       </strong>
+                    </span>
+                </div>
+                <div class="header-actions">  
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div align="center">
+        <p> Prima scegli la marca e poi il Reparto oppure utilizza il campo "Cerca"</p>
+        <div class="filter-buttons">
+            <!-- Filtro per la marca -->
+       <!--     <button class="filter-btn all active" data-marca="all">Tutti</button> -->
+            <button class="filter-btn elber" data-marca="ELBER">ELBER</button>
+            <button class="filter-btn ericsson" data-marca="ERICSSON">ERICSSON</button>
+            
+            <!-- Filtro per il RT (visibile solo dopo la selezione di una marca) -->
+     <!--       <button class="filter-btn all-rt" data-rt="all">Tutti RT</button> -->
+            <button class="filter-btn rt1" data-rt="RT1">RT1</button>
+            <button class="filter-btn rt2" data-rt="RT2">RT2</button>
+            <button class="filter-btn rt3" data-rt="RT3">RT3</button>
+            <button class="filter-btn rt2-rt3" data-rt="RT2 RT3">RT2 RT3</button>
+            <button class="filter-btn rt1-rt2" data-rt="RT1 RT2">RT1 RT2</button>
+            <input type="text" id="search-input" placeholder="Cerca..." onkeyup="filterPonteBlocks()" style="margin-bottom: 5px; padding: 3px; width: 200px; border-radius:20px;">
+
+        </div>
+    </div>
+
+    </div>
+    
+    <div class="network-container" id="network-container">
+        {% for ponte in ponti %}
+        <div 
+            class="ponte-block" 
+            id="ponte-{{ ponte.id }}" 
+            data-sorgente="{{ ponte.sorgente }}" 
+            data-destinazione="{{ ponte.destinazione }}"
+            data-marca="{{ ponte.marca }}"
+        >
+            <div class="ponte-header">
+                <p>
+                        <strong><span class="ponte-sorgente">{{ ponte.nome }} </span>- 
+                            {% if ponte.rt == 'RT1' %}
+                                <span class="ponte-badge ponte-rt1">{{ ponte.rt }}</span>
+                            {% elif ponte.rt == 'RT2' %}
+                                <span class="ponte-badge ponte-rt2">{{ ponte.rt }}</span>
+                            {% elif ponte.rt == 'RT3' %}
+                                <span class="ponte-badge ponte-rt3">{{ ponte.rt }}</span>
+                            {% elif ponte.rt == 'RT2 RT3' %}
+                                <span class="ponte-badge ponte-rt2-rt3">{{ ponte.rt }}</span>
+                            {% elif ponte.rt == 'RT1 RT2' %}
+                                <span class="ponte-badge ponte-rt1-rt2">{{ ponte.rt }}</span>
+                            {% else %}
+                                {{ ponte.rt }}
+                            {% endif %}
+                        </strong>
+                        <p><span class="ponte-marca">[ {{ ponte.marca }} ]<br></span></p>
+                </p>
+                <span class="ponte-title">
+                    <strong>da <span class="ponte-sorgente">{{ ponte.sorgente }}</span><br> a <span class="ponte-destinazione">{{ ponte.destinazione }}</span></strong>
+                </span>
+                <p>
+                <button class="btn-snmp" onclick="getSnmpData('{{ ponte.marca }}', '{{ ponte.id }}')">Estrai</button>
+                
+            </p>
+            <p><a href="http://{{ ponte.indirizzo_ip }}" target="_blank">{{ ponte.indirizzo_ip }}</a></p>
+            </div>
+            <div>
+            </div>
+            <div id="snmp-data-{{ ponte.marca }}-{{ ponte.id }}" class="snmp-data"></div>
+        </div>
+        {% endfor %}
+        
+    </div>
+        <header class="main-header">
+            <div class="header-container">
+                <div class="logo-section">
+              
+                </div>
+                <div class="header-controls">
+                    <div class="network-stats">
+                        <span class="stat-item total-bridges" style="font-style: italic; font-size: small;">© 2025 - RT Sicilia </span>
+                    </div>
+                    <div class="header-actions">
+                    </div>
+                </div>
+            </div>
+        </header>
+
+
+    <script>
+        //
+        // FUNZIONE CHE CAMBIA IL COLORE DEI RISULTATI A SECONDA DEL VALORE
+        //
+        function getSnmpData(marca, id) {
+            const snmpDataContainer = document.getElementById(`snmp-data-${marca}-${id}`);
+            
+            // Mostra il caricamento
+            snmpDataContainer.innerHTML = `
+                <div class="d-flex justify-content-center my-2">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Caricamento...</span>
+                    </div>
+                </div>`;
+            
+            // Richiesta al server
+            fetch(`/get_snmp_data/${marca}/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        snmpDataContainer.innerHTML = `
+                            <div class="alert alert-danger py-1" role="alert" style="font-size: 12px;">
+                                <i class="fas fa-exclamation-circle me-1"></i>
+                                ${data.error}
+                            </div>`;
+                        return;
+                    }
+        
+                    let snmpHtml = `
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-2">
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-sm mb-0">
+                                        <tbody style="font-size: 12px;">`;
+                    
+                    for (let [key, value] of Object.entries(data)) {
+                        let statusClass = "";
+                        let dex = "";
+                        let icon = "";
+                        
+                        if (value === "Errore") {
+                            snmpHtml += `
+                            <tr class="align-middle" style="line-height: 1;">
+                                <td class="fw-bold py-1" style="width: 40%">ERRORE</td>
+                                <td class="text-end py-1">
+                                    <span class="badge bg-danger text-white" style="font-size: 12px; padding: 3px 6px;">
+                                        ERRORE
+                                    </span>
+                                </td>
+                            </tr>`;
+                            continue;
+                        }
+        
+                        switch(key) {
+                            case "LDPC Stress": {
+                                const ldpcValue = parseInt(value);
+                                if (ldpcValue === 0.0) {
+                                    statusClass = "bg-success text-white";
+                                } else if (ldpcValue < 1000) {
+                                    statusClass = "bg-warning text-white";
+                                } else {
+                                    statusClass = "bg-danger text-white";
+                                    icon = '<i class="fas fa-exclamation-triangle me-1"></i>';
+                                }
+                                break;
+                            }
+                            case "TX Power 1":
+                            case "TX Power 2": {
+                                const txValue = parseFloat(value);
+                                if (txValue === 255 || txValue < 0) { 
+                                    statusClass = "bg-light text-dark";
+                                    value = "ASSENTE";
+                                } else if (txValue > 0 && txValue < 25) {
+                                    statusClass = "bg-danger text-white";
+                                    dex = "dBm";
+                                } else {
+                                    statusClass = "bg-success text-white";
+                                    dex = "dBm";
+                                }
+                                break;
+                            }
+
+                            case "Alarm NE severity":
+                                const NEValue = parseInt(value);
+                                switch(NEValue) {
+                                    case 5:
+                                        statusClass = "bg-success text-white";
+                                        value = "OK";
+                                        break;
+                                    case 4:
+                                        statusClass = "bg-info text-white";
+                                        value = "WARNING";
+                                        break;
+                                    case 3:
+                                        statusClass = "bg-warning text-white";
+                                        value = "MINOR";
+                                        break;
+                                    case 2:
+                                        statusClass = "bg-warning text-white";
+                                        value = "MAJOR";
+                                        break;
+                                    case 1:
+                                        statusClass = "bg-danger text-white";
+                                        value = "CRITICAL";
+                                        break;
+                                }
+                                break; 
+
+                                case "Bitrate 1":
+                                case "Bitrate 2":
+                                case "Bitrate 3":
+                                case "Bitrate 4":
+                                case "Bitrate 5":
+                                case "Bitrate 6":
+                                case "Bitrate 7":
+                                case "Bitrate 8":
+                                case "Bitrate 9":
+                                const Vbitrate = parseFloat(value);
+                                if (Vbitrate === 0) {
+                                    key = "Bitrate"
+                                    statusClass = "bg-light text-dark";
+                                    value = "ASSENTE";
+                                    dex = "";
+                                } else {
+                                    statusClass = "bg-light text-dark";
+                                    key = "Bitrate"
+                                    dex = "Mbit";
+                                }
+                                break;
+                                break; 
+                                
+                                case "RX Field CT 1/1/1":
+                                case "RX Field CT 1/1/2": {
+                                    const rxValue = parseFloat(value);
+                                    
+                                    if (rxValue === 0) {
+                                        statusClass = "bg-light text-dark";
+                                    } else if (rxValue < -50 && rxValue > -90 ) {
+                                        statusClass = "bg-danger text-white";
+                                        dex = "dBuV";
+                                    } else if (rxValue < -91) {
+                                        statusClass = "bg-light text-dark";
+                                        value = "ASSENTE";
+                                        dex = "";
+                                    } else {
+                                        statusClass = "bg-success text-white";
+                                        dex = "dBuV";
+                                    }
+                                    break;
+                                }
+                                
+                            case "RX Freq 1":
+                            case "RX Freq 2": {
+                                const rxField = parseFloat(value);
+                                if (rxField === 0) {
+                                    statusClass = "bg-light text-dark";
+                                    value = "ASSENTE";
+                                    dex = "";
+                                } else {
+                                    statusClass = "bg-light text-dark";
+                                    dex = "MHz";
+                                }
+                                break;
+                            }
+                            default: {
+                                if (value === "ALERT") {
+                                    statusClass = "bg-danger text-white";
+                                } else if (value === "OK") {
+                                    statusClass = "bg-success text-white";
+                                } else {
+                                    statusClass = "bg-light text-dark";
+                                }
+                            }
+                        }
+        
+                        snmpHtml += `
+                            <tr class="align-middle" style="line-height: 1;">
+                                <td class="fw-bold py-1" style="width: 40%">${key}</td>
+                                <td class="text-end py-1">
+                                    <span class="badge ${statusClass}" style="font-size: 12px; padding: 3px 6px;">
+                                        ${icon}${value}${dex ? ' ' + dex : ''}
+                                    </span>
+                                </td>
+                            </tr>`;
+                    }
+                    
+                    snmpHtml += `
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>`;
+                    
+                    snmpDataContainer.innerHTML = snmpHtml;
+                })
+                .catch(error => {
+                    console.error('Errore:', error);
+                    snmpDataContainer.innerHTML = `
+                        <div class="alert alert-danger py-1" role="alert" style="font-size: 12px;">
+                            <i class="fas fa-times-circle me-1"></i>
+                            Errore di connessione
+                        </div>`;
+                });
+        }
+        
+        
+        
+        // 
+        // FILTRO HTML
+        //
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const ponteBlocks = document.querySelectorAll('.ponte-block');
+            let selectedMarca = 'all';
+            let selectedRT = 'all';
+            
+            function applyFilters() {
+                ponteBlocks.forEach(block => {
+                    const rtElement = block.querySelector('.ponte-badge');
+                    const rtText = rtElement ? rtElement.textContent.trim() : '';
+                    
+                    // Trova la marca usando la classe ponte-marca
+                    const marcaElement = block.querySelector('.ponte-marca');
+                    const marcaText = marcaElement ? 
+                        marcaElement.textContent.replace('//', '').trim() : '';
+        
+                    let showBlock = true;
+        
+                    // Verifica se la marca selezionata corrisponde
+                    if (selectedMarca !== 'all' && !marcaText.includes(selectedMarca)) {
+                        showBlock = false;
+                    }
+        
+                    // Verifica se il filtro RT corrisponde
+                    if (selectedRT !== 'all' && !rtText.includes(selectedRT)) {
+                        showBlock = false;
+                    }
+        
+                    // Mostra o nascondi il blocco con animazione
+                    if (showBlock) {
+                        block.style.display = 'block';
+                        block.style.animation = 'fadeIn 0.5s ease';
+                    } else {
+                        block.style.display = 'none';
+                    }
+                });
+            }
+        
+            // Gestione della selezione del filtro per la marca
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Selezione della marca
+                    if (button.dataset.marca) {
+                        selectedMarca = button.dataset.marca;
+                        selectedRT = 'all'; // Reset del filtro RT
+                        filterButtons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        applyFilters();
+        
+                        // Mostra o nascondi i bottoni per RT in base alla selezione della marca
+                        document.querySelectorAll('.filter-btn[data-rt]').forEach(rtBtn => {
+                            rtBtn.style.display = selectedMarca !== 'all' ? 'inline-block' : 'none';
+                        });
+                    }
+        
+                    // Selezione RT
+                    if (button.dataset.rt) {
+                        selectedRT = button.dataset.rt;
+                        filterButtons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        applyFilters();
+                    }
+                });
+            });
+        });
+        // Funzione per filtrare i blocchi "ponte-block"
+        function filterPonteBlocks() {
+            const searchInput = document.getElementById('search-input').value.toLowerCase();
+            const ponteBlocks = document.querySelectorAll('.ponte-block');
+
+            ponteBlocks.forEach(block => {
+                const sorgente = block.getAttribute('data-sorgente').toLowerCase();
+                const destinazione = block.getAttribute('data-destinazione').toLowerCase();
+
+                // Mostra o nasconde i blocchi in base alla corrispondenza del testo cercato
+                if (sorgente.includes(searchInput) || destinazione.includes(searchInput)) {
+                    block.style.display = 'block'; // Mostra il blocco
+                } else {
+                    block.style.display = 'none'; // Nasconde il blocco
+                }
+            });
+        }
+
+    </script>
+</body>
+</html>
