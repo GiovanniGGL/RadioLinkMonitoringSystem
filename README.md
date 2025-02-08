@@ -47,4 +47,4 @@ A comprehensive web-based monitoring system for radio link networks, specificall
 - Color-coded status indicators
 - Performance thresholds monitoring
 - Equipment-specific parameter display
-![pontiscan](https://github.com/user-attachments/assets/4ebd66ee-4b4c-4641-900a-371d84c272cd)
+![pontiscan](https://github.com/user-attachments/assets/17edde08-fd6b-445c-9e80-278bd6351057)
